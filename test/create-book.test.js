@@ -61,7 +61,7 @@ describe("Verifying the creation of a book", () => {
   });
 
   describe("Happy path", () => {
-    let bookId;
+    let newBook;
 
     it("Create book", async () => {
       let book = {
@@ -70,18 +70,30 @@ describe("Verifying the creation of a book", () => {
         author: "Tim Burton",
       };
       const response = await axios.post(url, book);
+      newBook = response.data;
       expect(response.status).to.equal(StatusCodes.OK);
 
       let responseGetBooks = await axios.get(url);
       expect(responseGetBooks.status).to.equal(StatusCodes.OK);
       const quantityOfBooksAfter = responseGetBooks.data.length;
       expect(quantityOfBooksAfter).to.equal(quantityOfBooks + 1);
-
-      bookId = book.id;
+      
+      expect(
+        book.name
+      ).to.be.oneOf(
+        responseGetBooks.data.map(function (x) {
+          return x.name;
+        })
+      );
+      expect(book.author).to.be.oneOf(
+        responseGetBooks.data.map(function (x) {
+          return x.author;
+        })
+      );
     });
 
-    after(async() => {
-        await axios.delete(url + "/" + bookId);
+    after(async()=>{
+        await axios.delete(url+'/'+newBook.id);
     })
   });
 });
